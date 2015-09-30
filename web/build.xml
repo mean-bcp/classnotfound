@@ -1,0 +1,59 @@
+<project name="DOLLEE Web" default="dist">
+
+	<property name="src.dir" location="src" />
+	<property name="build.dir" location="build" />
+	<property name="dist.dir" location="dist" />
+	<property name="dist.report.dir" location="dist-report" />
+
+	<target name="clean">
+		<delete dir="${build.dir}" />
+		<delete dir="${dist.dir}" />
+		<delete dir="${dist.report.dir}" />
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${dist.dir}" />
+		<mkdir dir="${dist.report.dir}" />
+	</target>
+
+	<target name="dist" depends="clean, compile">
+
+		<!-- Create DolleeWeb.war file -->
+		<war file="${dist.dir}/ClassNotFoundWeb.war" webxml="WebContent/WEB-INF/web.xml">
+			<manifest>
+				<attribute name="Implementation-Vendor" value="Comcast" />
+				<attribute name="Implementation-Version" value="${label}" />
+				<attribute name="Implementation-Title" value="Dollee Web" />
+				<attribute name="Compiled-By" value="${user.name}" />
+				<attribute name="Compiled-On" value="${TODAY}" />
+				<attribute name="Sealed" value="false" />
+			</manifest>
+			<fileset dir="WebContent">
+				<exclude name="WEB-INF/web.xml" />
+				<exclude name="META-INF/MANIFEST.MF" />
+			</fileset>
+			<fileset dir=".">
+				<include name="log4j.properties" />
+			</fileset>
+			<classes dir="${build.dir}">
+				<exclude name="**/*.java" />
+			</classes>
+		</war>
+
+	</target>
+
+	<target name="compile">
+		<path id="classpath">
+			<pathelement location="lib/log4j-1.2.16.jar" />
+                        <pathelement location="lib/javax.xml.rpc_1.2.1.jar" />
+                        <pathelement location="lib/axis-1.4.jar" />
+                        <pathelement location="lib/javax.ejb_3.0.1.jar" />
+                        <pathelement location="lib/javax.jms_1.1.1.jar" />
+			<pathelement location="lib/servlet-api.jar" />
+		</path>
+
+		<javac srcdir="${src.dir}" destdir="${build.dir}" debug="on" source="1.6" target="1.6">
+			<classpath refid="classpath" />
+		</javac>
+
+	</target>
+
+</project>

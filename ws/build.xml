@@ -1,0 +1,83 @@
+<project name="DOLLEE WS" default="dist">
+
+	<property name="src.dir" location="src" />
+	<property name="dist.dir" location="dist" />
+	<property name="build.dir" location="build" />
+	<property name="dist.report.dir" location="dist-report" />
+
+
+	<target name="clean">
+                <delete dir="${build.dir}" />
+		<delete dir="${dist.dir}" />
+		<delete dir="${dist.report.dir}" />
+		<mkdir dir="${dist.dir}" />
+		<mkdir dir="${dist.report.dir}" />
+                <mkdir dir="${build.dir}" />
+	</target>
+
+	<target name="dist" depends="clean, compile">
+		<war destfile="${dist.dir}/ClassNotFoundWS.war" update="true">
+			<manifest>
+				<attribute name="Implementation-Vendor" value="Comcast" />
+				<attribute name="Implementation-Version" value="${label}" />
+				<attribute name="Implementation-Title" value="Dollee WS" />
+				<attribute name="Compiled-By" value="${user.name}" />
+				<attribute name="Compiled-On" value="${TODAY}" />
+				<attribute name="Sealed" value="false" />
+			</manifest>
+			<classes dir="${build.dir}">
+				<exclude name="**/*.java" />
+			</classes>
+			<fileset dir="WebContent">
+				<include name="error.html" />
+				<include name="WEB-INF/web.xml" />
+			</fileset>
+		</war>
+	</target>
+
+	<target name="compile">
+		
+		<path id="jaxws.classpath">
+			<pathelement location="lib/jaxws-tools-2.2.10.jar" />
+			<pathelement location="lib/jaxws-rt-2.2.10.jar" />
+		</path>
+
+		<path id="classpath">
+			<path refid="jaxws.classpath" />
+			<pathelement location="lib/log4j-1.2.16.jar" />
+                        <pathelement location="lib/javax.xml.rpc_1.2.1.jar" />
+                        <pathelement location="lib/axis-1.4.jar" />
+                        <pathelement location="lib/javax.ejb_3.0.1.jar" />
+                        <pathelement location="lib/javax.jms_1.1.1.jar" />
+                        <pathelement location="lib/servlet-api.jar" />
+		</path>
+		
+		<echo>${toString:classpath}</echo>
+
+		<javac srcdir="${src.dir}" destdir="${build.dir}" debug="on" source="1.6" target="1.6">
+			<classpath refid="classpath" />
+		</javac>
+
+		<!--
+		<taskdef name="wsgen" classname="com.sun.tools.ws.ant.WsGen" classpathref="jaxws.classpath" />
+		<wsgen 	debug="true" keep="true" 
+				destdir="${build.dir}" 
+				resourcedestdir="${build.dir}" 
+				sei="com.comcast.dollee.ws.Dollee">
+			<classpath>
+				<pathelement path="${classpath}" />
+				<pathelement location="${env.JAVA_HOME}/../lib/tools.jar" />
+				<pathelement location="${build.dir}" />
+			</classpath>
+		</wsgen>
+		-->
+	</target>
+
+	<target name="checkstyle">
+		<checkstyle config="${checkstyle.dir}/checkstyle_cet.xml" failOnViolation="false">
+			<fileset dir="${src.dir}" includes="**/*.java" />
+			<formatter toFile="${checkstyle.report.dir}/dolleews-checkstyle-report.txt" />
+		</checkstyle>
+	</target>
+
+</project>

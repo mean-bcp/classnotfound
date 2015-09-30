@@ -1,0 +1,96 @@
+<project name="DOLLEE App Server" default="dist" basedir=".">
+
+	<tstamp />
+
+	<property name="ear.dist.dir" location="dist" />
+	<property name="ear.dist.report.dir" location="dist-report" />
+	<property name="earcontent.dir" location="EarContent" />
+	<property name="dolleeejb.dir" location="ejb" />
+	<property name="dolleeejb.dist.dir" location="${dolleeejb.dir}/dist" />
+	<property name="dolleeejb.dist.report.dir" location="${dolleeejb.dir}/dist-report" />
+	<property name="dolleeweb.dir" location="web" />
+	<property name="dolleeweb.dist.dir" location="${dolleeweb.dir}/dist" />
+	<property name="dolleeweb.dist.report.dir" location="${dolleeweb.dir}/dist-report" />
+	<property name="dolleews.dir" location="ws" />
+	<property name="dolleews.dist.dir" location="${dolleews.dir}/dist" />
+	<property name="dolleews.dist.report.dir" location="${dolleews.dir}/dist-report" />
+
+	<target name="clean">
+		<delete dir="${ear.dist.dir}" />
+		<delete dir="${ear.dist.report.dir}" />
+		<mkdir dir="${ear.dist.dir}" />
+		<mkdir dir="${ear.dist.report.dir}" />
+	</target>
+
+	<target name="version" unless="${label}">
+		<input message="Please name this version (e.g. 1.0.0): " addproperty="label" defaultvalue="${DSTAMP}" />
+	</target>
+
+	<target name="dynamic-dir" depends="version">
+		<property name="ear.name" value="classnotfound-appserver-${label}" />
+		<property name="ear.dir" location="${ear.dist.dir}/${ear.name}" />
+	</target>
+
+	<target name="dist" depends="clean, dynamic-dir">
+
+		<copy todir="${ear.dir}">
+			<fileset dir="${earcontent.dir}" />
+		</copy>
+
+		<copy todir="${ear.dir}/APP-INF/lib">
+			<fileset dir="ws/lib" includes="*.jar" />
+		</copy>
+
+		<echo message="Calling ../ClassNotFoundEJB/build.xml" />
+
+		<ant antfile="build.xml" dir="${dolleeejb.dir}" />
+
+		<copy todir="${ear.dir}">
+			<fileset dir="${dolleeejb.dist.dir}" includes="*.jar" />
+		</copy>
+
+		<copy todir="${ear.dist.report.dir}">
+			<fileset dir="${dolleeejb.dist.report.dir}" />
+		</copy>
+
+		<echo message="Calling ../ClassNotFoundWeb/build.xml" />
+
+		<ant antfile="build.xml" dir="${dolleeweb.dir}" />
+
+		<copy todir="${ear.dir}">
+			<fileset dir="${dolleeweb.dist.dir}" includes="*.war" />
+		</copy>
+
+		<copy todir="${ear.dist.report.dir}">
+			<fileset dir="${dolleeweb.dist.report.dir}" />
+		</copy>
+
+		<echo message="Calling ../ClassNotFoundWS/build.xml" />
+
+		<ant antfile="build.xml" dir="${dolleews.dir}" />
+
+		<copy todir="${ear.dir}">
+			<fileset dir="${dolleews.dist.dir}" includes="*.war" />
+		</copy>
+
+		<copy todir="${ear.dist.report.dir}">
+			<fileset dir="${dolleews.dist.report.dir}" />
+		</copy>
+
+		<ear destfile="${ear.dist.dir}/${ear.name}.ear" appxml="${ear.dist.dir}/${ear.name}/META-INF/application.xml">
+			<manifest>
+				<attribute name="Implementation-Vendor" value="Comcast" />
+				<attribute name="Implementation-Version" value="${label}" />
+				<attribute name="Implementation-Title" value="Dollee EAR" />
+				<attribute name="Compiled-By" value="${user.name}" />
+				<attribute name="Compiled-On" value="${TODAY}" />
+				<attribute name="Sealed" value="false" />
+			</manifest>
+			<metainf dir="${ear.dist.dir}/${ear.name}/META-INF" excludes="application.xml" />
+			<fileset dir="${ear.dist.dir}/${ear.name}" excludes="META-INF/*" />
+		</ear>
+
+		<delete dir="${ear.dir}" />
+
+	</target>
+</project>
